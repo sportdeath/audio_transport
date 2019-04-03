@@ -36,14 +36,14 @@ std::vector<sample_info::spectral_point> audio_transport::interpolate(
     place_mass(
         left_mass, 
         interpolated_bin, 
-        (1 - interpolation_factor) * std::get<2>(t),
+        (1 - interpolation_factor) * std::get<2>(t)/left_mass.mass,
         left,
         interpolated
         );
     place_mass(
         right_mass, 
         interpolated_bin, 
-        interpolation_factor * std::get<2>(t),
+        interpolation_factor * std::get<2>(t)/right_mass.mass,
         right,
         interpolated
         );
@@ -61,11 +61,11 @@ void audio_transport::place_mass(
 
   for (size_t i = mass.left_bin; i < mass.right_bin; i++) {
     // Compute the location in the new array
-    int new_i = i + std::round(mass.center_bin - center_bin);
+    int new_i = i + std::round(center_bin - mass.center_bin);
     if (new_i < 0) continue;
     if (new_i >= (int) output.size()) continue;
 
-    output[new_i].value = scale * input[i].value;
+    output[new_i].value += scale * input[i].value;
   }
 }
 
@@ -86,22 +86,22 @@ std::vector<std::tuple<size_t, size_t, double>> audio_transport::transport_matri
           right_index,
           left_mass);
 
+      right_mass -= left_mass;
+
       left_index += 1;
       if (left_index >= left.size()) break;
       left_mass = left[left_index].mass;
-
-      right_mass -= left_mass;
     } else {
       T.emplace_back(
           left_index,
           right_index,
           right_mass);
 
+      left_mass -= right_mass;
+
       right_index += 1;
       if (right_index >= right.size()) break;
       right_mass = right[right_index].mass;
-
-      left_mass -= right_mass;
     }
   }
 
@@ -112,12 +112,13 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
    const std::vector<sample_info::spectral_point> & spectrum
    ) {
 
-  // Initial
+  // Initialize
   std::vector<spectral_mass> masses;
   audio_transport::spectral_mass initial_mass;
   initial_mass.left_bin = 0;
   initial_mass.center_bin = 0;
   masses.push_back(initial_mass);
+  double mass_sum = 0;
 
   bool sign = (spectrum[0].freq_reassigned > spectrum[0].freq);
   for (size_t i = 1; i < spectrum.size(); i++) {
@@ -151,6 +152,7 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
       for (size_t j = masses[masses.size() - 1].left_bin; j < i; j++) {
         masses[masses.size() - 1].mass += std::abs(spectrum[j].value);
       }
+      mass_sum += masses[masses.size() - 1].mass;
 
       // Construct a new mass
       spectral_mass mass;
@@ -166,6 +168,12 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
   masses[masses.size() - 1].mass = 0;
   for (size_t j = masses[masses.size() - 1].left_bin; j < spectrum.size(); j++) {
     masses[masses.size() - 1].mass += std::abs(spectrum[j].value);
+  }
+  mass_sum += masses[masses.size() - 1].mass;
+
+  // Normalize masses so that they sum to 1
+  for (size_t i = 0; i < masses.size(); i++) {
+    masses[i].mass /= mass_sum;
   }
 
   return masses;
