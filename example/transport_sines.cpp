@@ -5,8 +5,10 @@
 
 #include "audio_transport/audio_transport.hpp"
 
-int padding = 0;
-double window_size = 0.05;
+double sample_rate = 44100; // samples per second
+double total_time = 10; // seconds
+double window_size = 0.05; // seconds
+int padding = 5000; // samples
 bool synthesis_window = false;
 
 int main(int argc, char ** argv) {
@@ -18,34 +20,13 @@ int main(int argc, char ** argv) {
     return 1;
   }
 
-  // Read the files
-  //std::cout << "Reading left from file " << argv[1] << std::endl;
-  //double sample_rate_left;
-  //std::vector<std::vector<double>> audio_left =
-    //audiorw::read(argv[1], sample_rate_left);
-  //std::cout << "Reading right from file " << argv[2] << std::endl;
-  //double sample_rate_right;
-  //std::vector<std::vector<double>> audio_right =
-    //audiorw::read(argv[2], sample_rate_right);
-
-  // Construct some sines
-  double sample_rate_left = 44100;
-  double sample_rate_right = 44100;
-  std::vector<std::vector<double>> audio_left(1, std::vector<double>(sample_rate_left * 10));
-  std::vector<std::vector<double>> audio_right(1, std::vector<double>(sample_rate_right * 10));
-  for (size_t i = 0; i < audio_left[0].size(); i++) {
+  // Construct sines at 440 and 880 hz
+  std::vector<std::vector<double>> audio_left (1, std::vector<double>(sample_rate * total_time));
+  std::vector<std::vector<double>> audio_right(1, std::vector<double>(sample_rate * total_time));
+  for (size_t i = 0; i < sample_rate * total_time; i++) {
     double t = i/sample_rate_left;
     audio_left[0][i] = std::sin(2 * M_PI * 440 * t);
-  }
-  for (size_t i = 0; i < audio_left[0].size(); i++) {
-    double t = i/sample_rate_right;
-    //audio_right[0][i] = 0.5 * std::sin(2 * M_PI * 880 * t) + 0.5 * std::sin(2 * M_PI * 220 * t);
     audio_right[0][i] = std::sin(2 * M_PI * 880 * t);
-  }
-
-  if (sample_rate_left != sample_rate_right) {
-    std::cout << "Samples rates are not equal! " << sample_rate_left << " != " << sample_rate_right << std::endl;
-    return 1;
   }
 
   // Initialize the output audio
@@ -80,12 +61,6 @@ int main(int argc, char ** argv) {
           phases,
           window_size,
           interpolation_factor);
-
-      //if (w % 2 == 0) {
-        //for (int i = 0; i < spectral_points_interpolated[w].size(); i++) {
-          //spectral_points_interpolated[w][i].value = 0;
-        //}
-      //}
     }
 
     std::cout << "Converting the interpolation to the time domain" << std::endl;
