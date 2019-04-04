@@ -57,10 +57,8 @@ std::vector<sample_info::spectral_point> audio_transport::interpolate(
     std::pair<size_t, size_t> phase_query(left_mass.center_bin, right_mass.center_bin);
     if (phases.find(phase_query) != phases.end()) {
       // If so update the phase using the reassigned frequency
-      // Division by 2 comes from window overlap
-      //center_phase = phases[phase_query] + (interpolated_freq * window_size/2.)/2.;
-      //center_phase = phases[phase_query] + interpolated_freq * window_size/2.;
-      center_phase = phases[phase_query];
+      // Half of the update comes from the current bin, and half from the previous
+      center_phase = phases[phase_query] + (interpolated_freq * window_size/2.)/2. - (M_PI * interpolated_bin);
     } else {
       // Otherwise set the initial value to be an interpolation of the actual phases
       center_phase =
@@ -69,9 +67,7 @@ std::vector<sample_info::spectral_point> audio_transport::interpolate(
     }
 
     // Add the phase to the new phases
-    //new_phases[phase_query] = center_phase + (interpolated_freq * window_size/2.)/2.;
-    //new_phases[phase_query] = center_phase;
-    new_phases[phase_query] = center_phase + interpolated_freq * window_size/2.;
+    new_phases[phase_query] = center_phase + (interpolated_freq * window_size/2.)/2. + (M_PI * interpolated_bin);
 
     // Place the left and right masses
     place_mass(
