@@ -9,7 +9,7 @@ if(SAMPLE_INFO_INCLUDE)
   set(SAMPLE_INFO_FIND_QUIETLY TRUE)
 endif(SAMPLE_INFO_INCLUDE)
 
-find_path(SAMPLE_INFO_INCLUDE sample_info/spectral_point.hpp)
+find_path(SAMPLE_INFO_INCLUDE sample_info/spectral.hpp)
 
 find_library(SAMPLE_INFO_LIBRARY NAMES sample_info)
 

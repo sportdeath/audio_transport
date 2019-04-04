@@ -1,15 +1,14 @@
 #include <iostream>
 #include <audiorw.hpp>
 
-#include <sample_info/spectral_point.hpp>
+#include <sample_info/spectral.hpp>
 
-#include "audio_transport/audio_transport.hpp"
+#include "audio_transport.hpp"
 
 double sample_rate = 44100; // samples per second
 double total_time = 10; // seconds
 double window_size = 0.05; // seconds
-int padding = 5000; // samples
-bool synthesis_window = false;
+unsigned int padding = 4; // multiplies window size
 
 int main(int argc, char ** argv) {
 
@@ -42,22 +41,22 @@ int main(int argc, char ** argv) {
     std::cout << "Processing channel " << c << std::endl;
 
     std::cout << "Converting left input to the spectral domain" << std::endl;
-    std::vector<std::vector<sample_info::spectral_point>> spectral_points_left =
-      sample_info::spectral_analysis(audio_left[c], sample_rate, window_size, padding, synthesis_window);
+    std::vector<std::vector<sample_info::spectral::point>> points_left =
+      sample_info::spectral::analysis(audio_left[c], sample_rate, window_size, padding);
     std::cout << "Converting right input to the spectral domain" << std::endl;
-    std::vector<std::vector<sample_info::spectral_point>> spectral_points_right =
-      sample_info::spectral_analysis(audio_right[c], sample_rate, window_size, padding, synthesis_window);
+    std::vector<std::vector<sample_info::spectral::point>> points_right =
+      sample_info::spectral::analysis(audio_right[c], sample_rate, window_size, padding);
 
     std::cout << "Performing optimal transport based interpolation" << std::endl;
-    size_t num_windows = std::min(spectral_points_left.size(), spectral_points_right.size());
-    std::vector<std::vector<sample_info::spectral_point>> spectral_points_interpolated(num_windows);
+    size_t num_windows = std::min(points_left.size(), points_right.size());
+    std::vector<std::vector<sample_info::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
 
-      spectral_points_interpolated[w] = 
+      points_interpolated[w] = 
         audio_transport::interpolate(
-          spectral_points_left[w],
-          spectral_points_right[w],
+          points_left[w],
+          points_right[w],
           phases,
           window_size,
           interpolation_factor);
@@ -65,7 +64,7 @@ int main(int argc, char ** argv) {
 
     std::cout << "Converting the interpolation to the time domain" << std::endl;
     audio_interpolated[c] = 
-      sample_info::spectral_synthesis(spectral_points_interpolated, padding, synthesis_window);
+      sample_info::spectral::synthesis(points_interpolated, padding);
   }
 
   // Write the file

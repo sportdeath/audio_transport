@@ -3,12 +3,11 @@
 #include <cmath>
 #include <audiorw.hpp>
 
-#include <sample_info/spectral_point.hpp>
+#include <sample_info/spectral.hpp>
 
-#include "audio_transport/audio_transport.hpp"
+#include "audio_transport.hpp"
 
 double window_size = 1;
-bool synthesis_window = false;
 int window_index = 0;
 
 int main(int argc, char ** argv) {
@@ -35,19 +34,19 @@ int main(int argc, char ** argv) {
   }
 
   std::cout << "Converting to the spectral domain" << std::endl;
-  std::vector<std::vector<sample_info::spectral_point>> spectral_points =
-    sample_info::spectral_analysis(audio, sample_rate, window_size, synthesis_window);
+  std::vector<std::vector<sample_info::spectral::point>> points =
+    sample_info::spectral::analysis(audio, sample_rate, window_size);
 
   std::cout << "Grouping window #" << window_index << std::endl;
   std::vector<audio_transport::spectral_mass> masses = 
-    audio_transport::group_spectrum(spectral_points[window_index]);
+    audio_transport::group_spectrum(points[window_index]);
 
   std::cout << "Writing to output" << std::endl;
   std::ofstream output;
   output.open(argv[1]);
   for (auto mass :  masses) {
     for (size_t i = mass.left_bin; i < mass.right_bin; i++) {
-      sample_info::spectral_point point = spectral_points[window_index][i];
+      sample_info::spectral::point point = points[window_index][i];
       output << 
         point.freq << " " << 
         point.freq_reassigned << " " << 

@@ -3,13 +3,13 @@
 #include <tuple>
 #include <map>
 
-#include <sample_info/spectral_point.hpp>
+#include <sample_info/spectral.hpp>
 
-#include "audio_transport/audio_transport.hpp"
+#include "audio_transport.hpp"
 
-std::vector<sample_info::spectral_point> audio_transport::interpolate(
-    const std::vector<sample_info::spectral_point> & left,
-    const std::vector<sample_info::spectral_point> & right,
+std::vector<sample_info::spectral::point> audio_transport::interpolate(
+    const std::vector<sample_info::spectral::point> & left,
+    const std::vector<sample_info::spectral::point> & right,
     std::map<std::pair<size_t, size_t>, double> & phases,
     double window_size,
     double interpolation) {
@@ -23,14 +23,13 @@ std::vector<sample_info::spectral_point> audio_transport::interpolate(
     transport_matrix(left_masses, right_masses);
 
   // Initialize the output spectral masses
-  std::vector<sample_info::spectral_point> interpolated(left.size());
+  std::vector<sample_info::spectral::point> interpolated(left.size());
 
   // Initialize new phases
   std::map<std::pair<size_t, size_t>, double> new_phases;
 
   // Perform the interpolation
   for (auto t : T) {
-    //if (std::get<2>(t) < 0.1) continue;
     spectral_mass left_mass  =  left_masses[std::get<0>(t)];
     spectral_mass right_mass = right_masses[std::get<1>(t)];
 
@@ -104,8 +103,8 @@ void audio_transport::place_mass(
     int center_bin,
     double scale,
     double center_phase,
-    const std::vector<sample_info::spectral_point> & input,
-    std::vector<sample_info::spectral_point> & output) {
+    const std::vector<sample_info::spectral::point> & input,
+    std::vector<sample_info::spectral::point> & output) {
 
   // Compute how the phase changes in each bin
   double phase_shift = center_phase - std::arg(input[mass.center_bin].value);
@@ -166,7 +165,7 @@ std::vector<std::tuple<size_t, size_t, double>> audio_transport::transport_matri
 }
 
 std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
-   const std::vector<sample_info::spectral_point> & spectrum
+   const std::vector<sample_info::spectral::point> & spectrum
    ) {
 
   // Initialize the first mass
