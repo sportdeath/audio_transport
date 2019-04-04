@@ -24,7 +24,7 @@ int main(int argc, char ** argv) {
   std::vector<std::vector<double>> audio_left (1, std::vector<double>(sample_rate * total_time));
   std::vector<std::vector<double>> audio_right(1, std::vector<double>(sample_rate * total_time));
   for (size_t i = 0; i < sample_rate * total_time; i++) {
-    double t = i/sample_rate_left;
+    double t = i/sample_rate;
     audio_left[0][i] = std::sin(2 * M_PI * 440 * t);
     audio_right[0][i] = std::sin(2 * M_PI * 880 * t);
   }
@@ -43,10 +43,10 @@ int main(int argc, char ** argv) {
 
     std::cout << "Converting left input to the spectral domain" << std::endl;
     std::vector<std::vector<sample_info::spectral_point>> spectral_points_left =
-      sample_info::spectral_analysis(audio_left[c], sample_rate_left, window_size, padding, synthesis_window);
+      sample_info::spectral_analysis(audio_left[c], sample_rate, window_size, padding, synthesis_window);
     std::cout << "Converting right input to the spectral domain" << std::endl;
     std::vector<std::vector<sample_info::spectral_point>> spectral_points_right =
-      sample_info::spectral_analysis(audio_right[c], sample_rate_right, window_size, padding, synthesis_window);
+      sample_info::spectral_analysis(audio_right[c], sample_rate, window_size, padding, synthesis_window);
 
     std::cout << "Performing optimal transport based interpolation" << std::endl;
     size_t num_windows = std::min(spectral_points_left.size(), spectral_points_right.size());
@@ -70,5 +70,5 @@ int main(int argc, char ** argv) {
 
   // Write the file
   std::cout << "Writing to file " << argv[1] << std::endl;
-  audiorw::write(audio_interpolated, argv[1], sample_rate_left);
+  audiorw::write(audio_interpolated, argv[1], sample_rate);
 }

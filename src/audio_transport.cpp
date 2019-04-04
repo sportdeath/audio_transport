@@ -61,6 +61,7 @@ std::vector<sample_info::spectral_point> audio_transport::interpolate(
       center_phase = phases[phase_query] + (interpolated_freq * window_size/2.)/2. - (M_PI * interpolated_bin);
     } else {
       // Otherwise set the initial value to be an interpolation of the actual phases
+      // This doesn't really make sense in between, but that shouldn't matter much
       center_phase =
         (1 - interpolation) * std::arg(left[left_mass.center_bin].value) +
         interpolation * std::arg(right[right_mass.center_bin].value);
