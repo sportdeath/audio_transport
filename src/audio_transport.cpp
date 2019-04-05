@@ -10,7 +10,7 @@
 std::vector<sample_info::spectral::point> audio_transport::interpolate(
     const std::vector<sample_info::spectral::point> & left,
     const std::vector<sample_info::spectral::point> & right,
-    std::map<std::pair<size_t, size_t>, double> & phases,
+    std::vector<double> & phases,
     double window_size,
     double interpolation) {
 
@@ -26,7 +26,8 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
   std::vector<sample_info::spectral::point> interpolated(left.size());
 
   // Initialize new phases
-  std::map<std::pair<size_t, size_t>, double> new_phases;
+  std::vector<double> new_amplitudes(phases.size(), 0);
+  std::vector<double> new_phases(phases.size(), 0);
 
   // Perform the interpolation
   for (auto t : T) {
@@ -51,23 +52,10 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
       (1 - interpolation_rounded) * left[left_mass.center_bin].freq_reassigned +
       interpolation_rounded * right[right_mass.center_bin].freq_reassigned;
 
-    // Check to see if these masses were interpolated last time
-    double center_phase;
-    std::pair<size_t, size_t> phase_query(left_mass.center_bin, right_mass.center_bin);
-    if (phases.find(phase_query) != phases.end()) {
-      // If so update the phase using the reassigned frequency
-      // Half of the update comes from the current bin, and half from the previous
-      center_phase = phases[phase_query] + (interpolated_freq * window_size/2.)/2. - (M_PI * interpolated_bin);
-    } else {
-      // Otherwise set the initial value to be an interpolation of the actual phases
-      // This doesn't really make sense in between, but that shouldn't matter much
-      center_phase =
-        (1 - interpolation) * std::arg(left[left_mass.center_bin].value) +
-        interpolation * std::arg(right[right_mass.center_bin].value);
-    }
-
-    // Add the phase to the new phases
-    new_phases[phase_query] = center_phase + (interpolated_freq * window_size/2.)/2. + (M_PI * interpolated_bin);
+    double center_phase =
+      phases[interpolated_bin] + (interpolated_freq * window_size/2.)/2. - (M_PI * interpolated_bin);
+    double new_phase = 
+      center_phase + (interpolated_freq * window_size/2.)/2. + (M_PI * interpolated_bin);
 
     // Place the left and right masses
     place_mass(
@@ -76,7 +64,10 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
         (1 - interpolation) * std::get<2>(t)/left_mass.mass,
         center_phase,
         left,
-        interpolated
+        interpolated,
+        new_phase,
+        new_phases,
+        new_amplitudes
         );
     place_mass(
         right_mass, 
@@ -84,15 +75,16 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
         interpolation * std::get<2>(t)/right_mass.mass,
         center_phase,
         right,
-        interpolated
+        interpolated,
+        new_phase,
+        new_phases,
+        new_amplitudes
         );
   }
 
-  // Clear the map
-  phases.clear();
-  // Fill it with new phases
-  for (const auto & new_phase : new_phases) {
-    phases[new_phase.first] = new_phase.second;
+  // Fill the phases with the new phases
+  for (size_t i = 0; i < phases.size(); i++) {
+    phases[i] = new_phases[i];
   }
 
   return interpolated;
@@ -104,7 +96,10 @@ void audio_transport::place_mass(
     double scale,
     double center_phase,
     const std::vector<sample_info::spectral::point> & input,
-    std::vector<sample_info::spectral::point> & output) {
+    std::vector<sample_info::spectral::point> & output,
+    double next_phase,
+    std::vector<double> & phases,
+    std::vector<double> & amplitudes) {
 
   // Compute how the phase changes in each bin
   double phase_shift = center_phase - std::arg(input[mass.center_bin].value);
@@ -118,10 +113,16 @@ void audio_transport::place_mass(
     // Rotate the output by the phase offset
     // plus the frequency 
     double phase = phase_shift + std::arg(input[i].value);
+    double mag = scale * std::abs(input[i].value);
     std::complex<double> shifted_value =
-      std::polar(std::abs(input[i].value), phase);
+      std::polar(mag, phase);
 
-    output[new_i].value += scale * shifted_value;
+    output[new_i].value += shifted_value;
+
+    if (mag > amplitudes[new_i]) {
+      amplitudes[new_i] = mag;
+      phases[new_i] = next_phase;
+    }
   }
 }
 
@@ -168,6 +169,12 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
    const std::vector<sample_info::spectral::point> & spectrum
    ) {
 
+  // Keep track of the total mass
+  double mass_sum = 0;
+  for (size_t i = 0; i < spectrum.size(); i++) {
+    mass_sum += std::abs(spectrum[i].value);
+  }
+
   // Initialize the first mass
   std::vector<spectral_mass> masses;
   audio_transport::spectral_mass initial_mass;
@@ -175,14 +182,19 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
   initial_mass.center_bin = 0;
   masses.push_back(initial_mass);
 
-  // Keep track of the total mass
-  double mass_sum = 0;
-
-  bool sign = (spectrum[0].freq_reassigned > spectrum[0].freq);
-  for (size_t i = 1; i < spectrum.size(); i++) {
+  bool sign;
+  bool first = true;
+  for (size_t i = 0; i < spectrum.size(); i++) {
     bool current_sign = (spectrum[i].freq_reassigned > spectrum[i].freq);
 
+    if (first) {
+      first = false;
+      sign = current_sign;
+      continue;
+    }
+
     if (current_sign == sign) continue;
+
     if (sign) {
       // We are falling 
       // This is the center bin
@@ -202,15 +214,16 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
       // We are rising
       // This is the end
 
-      // Set the end of the mass
-      masses[masses.size() - 1].right_bin = i;
-
       // Compute the actual mass
       masses[masses.size() - 1].mass = 0;
       for (size_t j = masses[masses.size() - 1].left_bin; j < i; j++) {
         masses[masses.size() - 1].mass += std::abs(spectrum[j].value);
       }
-      mass_sum += masses[masses.size() - 1].mass;
+      // Normalize
+      masses[masses.size() - 1].mass /= mass_sum;
+
+      // Set the end of the mass
+      masses[masses.size() - 1].right_bin = i;
 
       // Construct a new mass
       spectral_mass mass;
@@ -227,12 +240,7 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
   for (size_t j = masses[masses.size() - 1].left_bin; j < spectrum.size(); j++) {
     masses[masses.size() - 1].mass += std::abs(spectrum[j].value);
   }
-  mass_sum += masses[masses.size() - 1].mass;
-
-  // Normalize masses so that they sum to 1
-  for (size_t i = 0; i < masses.size(); i++) {
-    masses[i].mass /= mass_sum;
-  }
+  masses[masses.size() - 1].mass /= mass_sum;
 
   return masses;
 } 
