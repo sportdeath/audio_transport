@@ -17,7 +17,7 @@ struct spectral_mass {
 std::vector<sample_info::spectral::point> interpolate(
     const std::vector<sample_info::spectral::point> & left,
     const std::vector<sample_info::spectral::point> & right,
-    std::map<std::pair<size_t, size_t>, double> & phases,
+    std::vector<double> & phases,
     double window_size,
     double interpolation_factor);
 
@@ -34,6 +34,9 @@ void place_mass(
     double scale,
     double center_phase,
     const std::vector<sample_info::spectral::point> & input,
-    std::vector<sample_info::spectral::point> & output);
+    std::vector<sample_info::spectral::point> & output,
+    double next_phase,
+    std::vector<double> & phases,
+    std::vector<double> & amplitudes);
 
 }
