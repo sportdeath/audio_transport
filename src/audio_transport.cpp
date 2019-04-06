@@ -44,8 +44,8 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
     double interpolation_rounded = interpolation;
     if (left_mass.center_bin != right_mass.center_bin) {
       interpolation_rounded = 
-        (interpolated_bin - left_mass.center_bin)/
-        ((double)(right_mass.center_bin - left_mass.center_bin));
+        ((double)interpolated_bin - (double)left_mass.center_bin)/
+        ((double)right_mass.center_bin - (double)left_mass.center_bin);
     }
     // Interpolate the frequency appropriately
     double interpolated_freq = 
