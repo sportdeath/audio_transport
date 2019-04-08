@@ -7,7 +7,7 @@
 #include "audio_transport.hpp"
 
 double window_size = 0.05; // seconds
-unsigned int padding = 3; // multiplies window size
+unsigned int padding = 7; // multiplies window size
 
 int main(int argc, char ** argv) {
 
@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
     std::vector<std::vector<sample_info::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
-      interpolation_factor = 3 * interpolation_factor -1;
+      interpolation_factor = 3 * interpolation_factor - 1.;
       interpolation_factor = std::min(1.,std::max(0.,interpolation_factor));
 
       points_interpolated[w] = 
@@ -66,12 +66,6 @@ int main(int argc, char ** argv) {
           phases,
           window_size,
           interpolation_factor);
-
-      //if (w % 2 == 0) {
-        //for (size_t i = 0; i < points_interpolated[w].size(); i++) {
-          //points_interpolated[w][i].value = 0;
-        //}
-      //}
     }
 
     std::cout << "Converting the interpolation to the time domain" << std::endl;

@@ -8,7 +8,7 @@
 double sample_rate = 44100; // samples per second
 double total_time = 10; // seconds
 double window_size = 0.05; // seconds
-unsigned int padding = 4; // multiplies window size
+unsigned int padding = 7; // multiplies window size
 
 int main(int argc, char ** argv) {
 
@@ -24,9 +24,8 @@ int main(int argc, char ** argv) {
   std::vector<std::vector<double>> audio_right(1, std::vector<double>(sample_rate * total_time));
   for (size_t i = 0; i < sample_rate * total_time; i++) {
     double t = i/sample_rate;
-    audio_left[0][i] = std::sin(2 * M_PI * 440 * t);
+    audio_left[0][i] =  std::sin(2 * M_PI * 440 * t);
     audio_right[0][i] = std::sin(2 * M_PI * 880 * t);
-    //audio_right[0][i] = std::fmod(2 * M_PI * 440 * t, 2*M_PI)/M_PI - 1;
   }
 
   // Initialize the output audio
@@ -53,6 +52,8 @@ int main(int argc, char ** argv) {
     std::vector<std::vector<sample_info::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
+      interpolation_factor = interpolation_factor * 2 - 0.5;
+      interpolation_factor = std::min(1.,std::max(0.,interpolation_factor));
 
       points_interpolated[w] = 
         audio_transport::interpolate(

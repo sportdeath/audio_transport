@@ -114,10 +114,7 @@ void audio_transport::place_mass(
     // plus the frequency 
     double phase = phase_shift + std::arg(input[i].value);
     double mag = scale * std::abs(input[i].value);
-    std::complex<double> shifted_value =
-      std::polar(mag, phase);
-
-    output[new_i].value += shifted_value;
+    output[new_i].value += std::polar(mag, phase);
 
     if (mag > amplitudes[new_i]) {
       amplitudes[new_i] = mag;
