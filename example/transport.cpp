@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <audiorw.hpp>
 
-#include "spectral.hpp"
-#include "audio_transport.hpp"
+#include "audio_transport/spectral.hpp"
+#include "audio_transport/audio_transport.hpp"
 
 double window_size = 0.05; // seconds
 unsigned int padding = 7; // multiplies window size

@@ -3,8 +3,8 @@
 #include <cmath>
 #include <audiorw.hpp>
 
-#include "spectral.hpp"
-#include "audio_transport.hpp"
+#include "audio_transport/spectral.hpp"
+#include "audio_transport/audio_transport.hpp"
 
 double window_size = 1;
 int window_index = 0;

@@ -6,7 +6,7 @@
 
 #include <fftw3.h>
 
-#include "spectral.hpp"
+#include "audio_transport/spectral.hpp"
 
 using namespace audio_transport;
 

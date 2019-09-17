@@ -1,6 +1,7 @@
 *.wav
 *.txt
 *.pdf
+*.png
 build
 *.mp3
 *.flac

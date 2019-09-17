@@ -4,7 +4,7 @@
 #include <tuple>
 #include <map>
 
-#include "spectral.hpp"
+#include "audio_transport/spectral.hpp"
 
 namespace audio_transport {
 

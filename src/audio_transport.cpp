@@ -3,8 +3,8 @@
 #include <tuple>
 #include <map>
 
-#include "spectral.hpp"
-#include "audio_transport.hpp"
+#include "audio_transport/spectral.hpp"
+#include "audio_transport/audio_transport.hpp"
 
 std::vector<audio_transport::spectral::point> audio_transport::interpolate(
     const std::vector<audio_transport::spectral::point> & left,

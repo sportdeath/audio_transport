@@ -1,8 +1,8 @@
 #include <iostream>
 #include <audiorw.hpp>
 
-#include "spectral.hpp"
-#include "audio_transport.hpp"
+#include "audio_transport/spectral.hpp"
+#include "audio_transport/audio_transport.hpp"
 
 double sample_rate = 44100; // samples per second
 double total_time = 5; // seconds
