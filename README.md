@@ -7,4 +7,3 @@ Audio examples can be found [here](https://soundcloud.com/audio_transport).
 Click on the image below for an (outdated) video demonstration. New video coming soon!
 
 [![video](http://img.youtube.com/vi/PQGV0fk3Gww/0.jpg)](https://www.youtube.com/watch?v=PQGV0fk3Gww)
-

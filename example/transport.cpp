@@ -56,7 +56,7 @@ int main(int argc, char ** argv) {
     std::vector<std::vector<sample_info::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
-      interpolation_factor = 3 * interpolation_factor - 1.;
+      interpolation_factor = 4 * interpolation_factor - 1;
       interpolation_factor = std::min(1.,std::max(0.,interpolation_factor));
 
       points_interpolated[w] = 

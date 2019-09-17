@@ -2,3 +2,6 @@
 *.txt
 *.pdf
 build
+*.mp3
+*.flac
+*.o

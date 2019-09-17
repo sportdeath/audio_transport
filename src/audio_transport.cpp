@@ -24,6 +24,9 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
 
   // Initialize the output spectral masses
   std::vector<sample_info::spectral::point> interpolated(left.size());
+  for (unsigned int i = 0; i < left.size(); i++) {
+    interpolated[i].freq = left[i].freq;
+  }
 
   // Initialize new phases
   std::vector<double> new_amplitudes(phases.size(), 0);
@@ -57,11 +60,15 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
     double new_phase = 
       center_phase + (interpolated_freq * window_size/2.)/2. + (M_PI * interpolated_bin);
 
+    // Uncomment this for HORIZONTAL INCOHERENCE
+    // center_phase = std::arg(left[interpolated_bin].value);
+
     // Place the left and right masses
     place_mass(
         left_mass, 
         interpolated_bin, 
         (1 - interpolation) * std::get<2>(t)/left_mass.mass,
+        interpolated_freq,
         center_phase,
         left,
         interpolated,
@@ -73,6 +80,7 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
         right_mass, 
         interpolated_bin, 
         interpolation * std::get<2>(t)/right_mass.mass,
+        interpolated_freq,
         center_phase,
         right,
         interpolated,
@@ -80,6 +88,7 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
         new_phases,
         new_amplitudes
         );
+
   }
 
   // Fill the phases with the new phases
@@ -94,6 +103,7 @@ void audio_transport::place_mass(
     const spectral_mass & mass,
     int center_bin,
     double scale,
+    double interpolated_freq,
     double center_phase,
     const std::vector<sample_info::spectral::point> & input,
     std::vector<sample_info::spectral::point> & output,
@@ -119,6 +129,7 @@ void audio_transport::place_mass(
     if (mag > amplitudes[new_i]) {
       amplitudes[new_i] = mag;
       phases[new_i] = next_phase;
+      output[new_i].freq_reassigned = interpolated_freq;
     }
   }
 }
@@ -183,6 +194,10 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
   bool first = true;
   for (size_t i = 0; i < spectrum.size(); i++) {
     bool current_sign = (spectrum[i].freq_reassigned > spectrum[i].freq);
+
+    // Uncomment this for VERTICAL INCOHERENCE
+    //sign = false;
+    //current_sign = not sign;
 
     if (first) {
       first = false;

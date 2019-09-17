@@ -6,7 +6,7 @@
 #include "audio_transport.hpp"
 
 double sample_rate = 44100; // samples per second
-double total_time = 10; // seconds
+double total_time = 5; // seconds
 double window_size = 0.05; // seconds
 unsigned int padding = 7; // multiplies window size
 
@@ -24,8 +24,9 @@ int main(int argc, char ** argv) {
   std::vector<std::vector<double>> audio_right(1, std::vector<double>(sample_rate * total_time));
   for (size_t i = 0; i < sample_rate * total_time; i++) {
     double t = i/sample_rate;
-    audio_left[0][i] =  std::sin(2 * M_PI * 440 * t);
-    audio_right[0][i] = std::sin(2 * M_PI * 880 * t);
+    audio_left[0][i] =  0.7 * std::sin(2 * M_PI * 220 * t);
+    //audio_right[0][i] = std::sin(2 * M_PI * 440 * t);
+    audio_right[0][i] = 0.7 * (2 * std::fmod(220 * t, 1) - 1);
   }
 
   // Initialize the output audio
@@ -43,6 +44,16 @@ int main(int argc, char ** argv) {
     std::cout << "Converting right input to the spectral domain" << std::endl;
     std::vector<std::vector<sample_info::spectral::point>> points_right =
       sample_info::spectral::analysis(audio_right[c], sample_rate, window_size, padding);
+
+    // Zero out every other window
+    //for (unsigned int i = 0; i < points_left.size(); i++)
+      //if (i % 2 != 0)
+        //for (unsigned int j = 0; j < points_left[i].size(); j++)
+          //points_left[i][j].value = 0.00000001;
+    //for (unsigned int i = 0; i < points_right.size(); i++)
+      //if (i % 2 != 0)
+        //for (unsigned int j = 0; j < points_right[i].size(); j++)
+          //points_right[i][j].value = 0.00000001;
 
     // Initialize phases
     std::vector<double> phases(points_left[0].size(), 0);

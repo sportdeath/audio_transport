@@ -32,6 +32,7 @@ void place_mass(
     const spectral_mass & mass,
     int center_bin,
     double scale,
+    double interpolated_freq,
     double center_phase,
     const std::vector<sample_info::spectral::point> & input,
     std::vector<sample_info::spectral::point> & output,
