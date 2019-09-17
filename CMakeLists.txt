@@ -26,10 +26,10 @@ file(GLOB PROJECT_SOURCES src/*.cpp)
 ## External Libraries
 #######################
 
-# Find sample_info
-find_package(SAMPLE_INFO REQUIRED)
-include_directories(${SAMPLE_INFO_INCLUDE})
-set(LIBS ${LIBS} ${SAMPLE_INFO_LIBRARY})
+# FFTW3
+find_package(FFTW REQUIRED)
+include_directories(${FFTW_INCLUDES})
+set(LIBS ${LIBS} ${FFTW_LIBRARIES})
 
 ####################
 ## Library Creation

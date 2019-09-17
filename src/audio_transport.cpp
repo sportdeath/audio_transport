@@ -3,13 +3,12 @@
 #include <tuple>
 #include <map>
 
-#include <sample_info/spectral.hpp>
-
+#include "spectral.hpp"
 #include "audio_transport.hpp"
 
-std::vector<sample_info::spectral::point> audio_transport::interpolate(
-    const std::vector<sample_info::spectral::point> & left,
-    const std::vector<sample_info::spectral::point> & right,
+std::vector<audio_transport::spectral::point> audio_transport::interpolate(
+    const std::vector<audio_transport::spectral::point> & left,
+    const std::vector<audio_transport::spectral::point> & right,
     std::vector<double> & phases,
     double window_size,
     double interpolation) {
@@ -23,7 +22,7 @@ std::vector<sample_info::spectral::point> audio_transport::interpolate(
     transport_matrix(left_masses, right_masses);
 
   // Initialize the output spectral masses
-  std::vector<sample_info::spectral::point> interpolated(left.size());
+  std::vector<audio_transport::spectral::point> interpolated(left.size());
   for (unsigned int i = 0; i < left.size(); i++) {
     interpolated[i].freq = left[i].freq;
   }
@@ -105,8 +104,8 @@ void audio_transport::place_mass(
     double scale,
     double interpolated_freq,
     double center_phase,
-    const std::vector<sample_info::spectral::point> & input,
-    std::vector<sample_info::spectral::point> & output,
+    const std::vector<audio_transport::spectral::point> & input,
+    std::vector<audio_transport::spectral::point> & output,
     double next_phase,
     std::vector<double> & phases,
     std::vector<double> & amplitudes) {
@@ -174,7 +173,7 @@ std::vector<std::tuple<size_t, size_t, double>> audio_transport::transport_matri
 }
 
 std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
-   const std::vector<sample_info::spectral::point> & spectrum
+   const std::vector<audio_transport::spectral::point> & spectrum
    ) {
 
   // Keep track of the total mass

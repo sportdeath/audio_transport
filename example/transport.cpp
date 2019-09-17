@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <audiorw.hpp>
 
-#include <sample_info/spectral.hpp>
-
+#include "spectral.hpp"
 #include "audio_transport.hpp"
 
 double window_size = 0.05; // seconds
@@ -42,18 +41,18 @@ int main(int argc, char ** argv) {
     std::cout << "Processing channel " << c << std::endl;
 
     std::cout << "Converting left input to the spectral domain" << std::endl;
-    std::vector<std::vector<sample_info::spectral::point>> points_left =
-      sample_info::spectral::analysis(audio_left[c], sample_rate, window_size, padding);
+    std::vector<std::vector<audio_transport::spectral::point>> points_left =
+      audio_transport::spectral::analysis(audio_left[c], sample_rate, window_size, padding);
     std::cout << "Converting right input to the spectral domain" << std::endl;
-    std::vector<std::vector<sample_info::spectral::point>> points_right =
-      sample_info::spectral::analysis(audio_right[c], sample_rate, window_size, padding);
+    std::vector<std::vector<audio_transport::spectral::point>> points_right =
+      audio_transport::spectral::analysis(audio_right[c], sample_rate, window_size, padding);
 
     // Initialize phases
     std::vector<double> phases(points_left[0].size(), 0);
 
     std::cout << "Performing optimal transport based interpolation" << std::endl;
     size_t num_windows = std::min(points_left.size(), points_right.size());
-    std::vector<std::vector<sample_info::spectral::point>> points_interpolated(num_windows);
+    std::vector<std::vector<audio_transport::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
       interpolation_factor = 4 * interpolation_factor - 1;
@@ -70,7 +69,7 @@ int main(int argc, char ** argv) {
 
     std::cout << "Converting the interpolation to the time domain" << std::endl;
     audio_interpolated[c] = 
-      sample_info::spectral::synthesis(points_interpolated, padding);
+      audio_transport::spectral::synthesis(points_interpolated, padding);
   }
 
   // Write the file
