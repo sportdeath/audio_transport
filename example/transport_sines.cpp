@@ -24,8 +24,8 @@ int main(int argc, char ** argv) {
   for (size_t i = 0; i < sample_rate * total_time; i++) {
     double t = i/sample_rate;
     audio_left[0][i] =  0.7 * std::sin(2 * M_PI * 220 * t);
-    //audio_right[0][i] = std::sin(2 * M_PI * 440 * t);
-    audio_right[0][i] = 0.7 * (2 * std::fmod(220 * t, 1) - 1);
+    audio_right[0][i] = 0.7 * std::sin(2 * M_PI * 440 * t);
+    //audio_right[0][i] = 0.7 * (2 * std::fmod(220 * t, 1) - 1);
   }
 
   // Initialize the output audio

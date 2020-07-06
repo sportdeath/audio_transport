@@ -10,12 +10,16 @@ unsigned int padding = 7; // multiplies window size
 
 int main(int argc, char ** argv) {
 
-  if (argc != 4) {
+  if (argc != 6) {
     std::cout <<
-      "Usage: " << argv[0] << " left_file right_file output_file"
+      "Usage: " << argv[0] << " left_file right_file start_percent end_percent output_file"
       << std::endl;
     return 1;
   }
+
+  // Get the percents
+  double start_fraction = std::atof(argv[3])/100.;
+  double end_fraction = std::atof(argv[4])/100.;
 
   // Open the audio files
   double sample_rate_left;
@@ -55,7 +59,7 @@ int main(int argc, char ** argv) {
     std::vector<std::vector<audio_transport::spectral::point>> points_interpolated(num_windows);
     for (size_t w = 0; w < num_windows; w++) {
       double interpolation_factor = w/(double) num_windows;
-      interpolation_factor = 4 * interpolation_factor - 1;
+      interpolation_factor = (interpolation_factor - start_fraction)/(end_fraction - start_fraction);
       interpolation_factor = std::min(1.,std::max(0.,interpolation_factor));
 
       points_interpolated[w] = 
@@ -73,6 +77,6 @@ int main(int argc, char ** argv) {
   }
 
   // Write the file
-  std::cout << "Writing to file " << argv[3] << std::endl;
-  audiorw::write(audio_interpolated, argv[3], sample_rate);
+  std::cout << "Writing to file " << argv[5] << std::endl;
+  audiorw::write(audio_interpolated, argv[5], sample_rate);
 }
