@@ -1,12 +1,12 @@
 # Audio Transport
 
-This code implements a novel audio effect for transitioning between audio signals that we call "audio transport". As an interpolation parameter is changed, the pitches in one signal slide to the pitches in the other, producing a portamento, or musical glide. The assignment of pitches in one sound to pitches in the other is accomplished by solving a 1-dimensional optimal transport problem.
+This code implements a novel effect for transitioning between audio signals that we call "audio transport". As an interpolation parameter is changed, the pitches in one signal slide to the pitches in the other, producing a portamento, or musical glide. The assignment of pitches in one sound to pitches in the other is accomplished by solving a 1-dimensional optimal transport problem.
 
 The effect is described in [this paper](https://arxiv.org/abs/1906.06763). Audio examples can be found [here](https://soundcloud.com/audio_transport), or click on the image below for a video demonstration:
 
 [![video](https://live.staticflickr.com/65535/49050087898_a81680c7cb_o_d.png)](https://www.youtube.com/watch?v=LXqZMKXSPJo)
 
-This code provides the *static* effect, meaning it provides an executable that takes two audio files as input and combines the two using the effect to produce and output audio file. The code demonstrated in the video that uses the effect *live*, uses the functions provided by this library to apply the effect to [portaudio](http://www.portaudio.com/) streams. The live code is super hacky and you could probably make something much better, which is why I haven't included it here. But if you really want it, I can send it to you. All of the important stuff is in this library.
+This code provides the *static* effect, meaning it provides an executable that takes two audio files as input and combines the two using the effect to produce and output audio file. The code demonstrated in the video that uses the effect *live* uses the functions provided by this library on [portaudio](http://www.portaudio.com/) streams. The live code is super hacky and you could probably make something much better, which is why I haven't included it here. But if you really want it, I can send it to you. All of the important stuff is in this library.
 
 ## Usage
 
@@ -14,7 +14,9 @@ This code provides the *static* effect, meaning it provides an executable that t
 
 Using the static effect does not require writing any more code but it does require several dependencies. You will need [```fftw3```](http://fftw.org/), [```ffmpeg```](https://ffmpeg.org/) and [```audiorw```](https://github.com/sportdeath/audiorw).
 
-Install ```fftw3``` and ```ffmpeg``` via your system package manager. This code has been tested on versions 3.3.8 and 4.2.3 respectively on a machine running Arch Linux. Hopefully things don't break on your system but if they do, please make a pull request :-) ! Then install the ```audiorw``` library with ```cmake```:
+Install ```fftw3``` and ```ffmpeg``` via your system package manager. This code has been tested on versions 3.3.8 and 4.2.3 respectively on a machine running Arch Linux. Hopefully things don't break on your system but if they do, please make a pull request :-) !
+
+ Then install the ```audiorw``` library with ```cmake```:
 
     git clone https://github.com/sportdeath/audiorw
     mkdir audiorw/build
@@ -31,9 +33,9 @@ Once the dependencies are installed, install ```audio_transport``` with ```cmake
     cmake .. -D BUILD_EXAMPLES=ON
     make
 
-Then, to apply the audio effect use the ```transport``` binary. For example, below we tranform piano audio into guitar audio. The output starts by sounding like the piano audio for the first 25% of the duration. Then between 25% and 75% of the duration, the piano is transformed into a guitar. In the last 25% the audio is simply the guitar.
+Then, to apply the effect use the ```transport``` binary. For example, below we tranform piano audio into guitar audio. The output starts by sounding like the piano audio for the first 20% of the duration. Then between 20% and 70% of the duration, the piano is transformed into a guitar. In the last 30% the audio is simply the guitar.
 
-    ./transport piano.wav guitar.mp3 25 75 out.flac
+    ./transport piano.wav guitar.mp3 20 70 out.flac
 
 ### External Use
 
