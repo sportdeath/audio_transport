@@ -2,7 +2,7 @@
 
 This code implements a novel effect for transitioning between audio signals that we call "audio transport". As an interpolation parameter is changed, the pitches in one signal slide to the pitches in the other, producing a portamento, or musical glide. The assignment of pitches in one sound to pitches in the other is accomplished by solving a 1-dimensional optimal transport problem.
 
-The effect is described in [this paper](https://arxiv.org/abs/1906.06763). Audio examples can be found [here](https://soundcloud.com/audio_transport), or click on the image below for a video demonstration:
+The effect is described in [this paper](https://arxiv.org/abs/1906.06763) which won "Best Student Paper" at the [22nd International Conference on Digital Audio Effects](http://dafx2019.bcu.ac.uk/). Audio examples can be found [here](https://soundcloud.com/audio_transport), or click on the image below for a video demonstration:
 
 [![video](https://live.staticflickr.com/65535/49050087898_a81680c7cb_o_d.png)](https://www.youtube.com/watch?v=LXqZMKXSPJo)
 
