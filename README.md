@@ -37,6 +37,12 @@ Then, to apply the effect use the ```transport``` binary. For example, below we 
 
     ./transport piano.wav guitar.mp3 20 70 out.flac
 
+You can also apply the effect to a single file with the ```glide``` binary. The input file serves as one input to the "transport" and the output of the effect is fed back into the second input. This slurs all of the frequencies in the input like the glide/lag/portamento knob found on some synthesizers ... however it works on any audio input.
+
+In this example we apply the glide effect to a piano with a time constant of 1 millisecond:
+
+    ./glide piano.wav 1 piano_glide.ogg
+
 ### External Use
 
 If you want to use the audio transport functions provided by this library in another project (*e.g.* to make a live effect) then this library only requires [```fftw3```](http://fftw.org/). Once you have it, install ```audio_transport``` with ```cmake```:
