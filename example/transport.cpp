@@ -4,6 +4,7 @@
 
 #include "audio_transport/spectral.hpp"
 #include "audio_transport/audio_transport.hpp"
+#include "audio_transport/equal_loudness.hpp"
 
 double window_size = 0.05; // seconds
 unsigned int padding = 7; // multiplies window size
@@ -38,7 +39,6 @@ int main(int argc, char ** argv) {
   size_t num_channels = std::min(audio_left.size(), audio_right.size());
   std::vector<std::vector<double>> audio_interpolated(num_channels);
 
-
   // Iterate over the channels
   for (size_t c = 0; c < num_channels; c++) {
 
@@ -50,6 +50,10 @@ int main(int argc, char ** argv) {
     std::cout << "Converting right input to the spectral domain" << std::endl;
     std::vector<std::vector<audio_transport::spectral::point>> points_right =
       audio_transport::spectral::analysis(audio_right[c], sample_rate, window_size, padding);
+
+    std::cout << "Applying equal loudness filters" << std::endl;
+    audio_transport::equal_loudness::apply(points_left);
+    audio_transport::equal_loudness::apply(points_right);
 
     // Initialize phases
     std::vector<double> phases(points_left[0].size(), 0);
@@ -70,6 +74,9 @@ int main(int argc, char ** argv) {
           window_size,
           interpolation_factor);
     }
+
+    std::cout << "Removing equal loudness filters" << std::endl;
+    audio_transport::equal_loudness::remove(points_interpolated);
 
     std::cout << "Converting the interpolation to the time domain" << std::endl;
     audio_interpolated[c] = 

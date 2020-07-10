@@ -230,17 +230,20 @@ std::vector<audio_transport::spectral_mass> audio_transport::group_spectrum(
       for (size_t j = masses[masses.size() - 1].left_bin; j < i; j++) {
         masses[masses.size() - 1].mass += std::abs(spectrum[j].value);
       }
-      // Normalize
-      masses[masses.size() - 1].mass /= mass_sum;
 
-      // Set the end of the mass
-      masses[masses.size() - 1].right_bin = i;
+      if (masses[masses.size() - 1].mass > 0) {
+        // Normalize
+        masses[masses.size() - 1].mass /= mass_sum;
 
-      // Construct a new mass
-      spectral_mass mass;
-      mass.left_bin = i;
-      mass.center_bin = i;
-      masses.push_back(mass);
+        // Set the end of the mass
+        masses[masses.size() - 1].right_bin = i;
+
+        // Construct a new mass
+        spectral_mass mass;
+        mass.left_bin = i;
+        mass.center_bin = i;
+        masses.push_back(mass);
+      }
     }
     sign = current_sign;
   }
